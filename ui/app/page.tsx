@@ -102,8 +102,10 @@ export default function Home() {
     setThreadId(id);
   }, []);
 
-  const handleResponseEnd = useCallback(() => {
-    void hydrateState(threadId);
+  const handleResponseEnd = useCallback((id?: string | null) => {
+    const target = id ?? threadId;
+    if (!target) return;
+    void hydrateState(target);
   }, [hydrateState, threadId]);
 
   return (

@@ -23,7 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Script
-          src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"
+          src="/crypto-randomuuid-polyfill.js"
           strategy="beforeInteractive"
         />
         {children}

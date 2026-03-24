@@ -4,6 +4,31 @@ import json
 import os
 from typing import Any, Dict
 
+from dotenv import load_dotenv
+os.environ["TRACELOOP_TELEMETRY"] = "false"
+# Load env first so tracing configuration can be sourced from .env/.env.local.
+load_dotenv('.env.local')
+load_dotenv()
+
+from traceloop.sdk import Traceloop
+from traceloop.sdk.instruments import Instruments
+
+dynatrace_api_url = os.getenv("DYNATRACE_API_URL")
+dynatrace_api_token = os.getenv("DYNATRACE_API_TOKEN")
+
+if dynatrace_api_url and dynatrace_api_token:
+    headers = {"Authorization": f"Api-Token {dynatrace_api_token}"}
+    # Block the OpenAI HTTP-level instrumentation due to a known streaming issue
+    # (AsyncAPIResponse has no .id attribute). Keep OPENAI_AGENTS tracing enabled.
+    Traceloop.init(
+        app_name="openai-travel-agent",
+        api_endpoint=dynatrace_api_url,
+        headers=headers,
+        block_instruments={Instruments.OPENAI},
+    )
+else:
+    print("Dynatrace tracing disabled: set DYNATRACE_API_URL and DYNATRACE_API_TOKEN to enable it.")
+
 from chatkit.server import StreamingResult
 from fastapi import Depends, FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,13 +52,10 @@ from server import AirlineServer
 
 app = FastAPI()
 
-# Disable tracing for zero data retention orgs
-os.environ.setdefault("OPENAI_TRACING_DISABLED", "1")
-
 # CORS configuration (adjust as needed for deployment)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://localhost:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,6 +66,16 @@ chat_server = AirlineServer()
 
 def get_server() -> AirlineServer:
     return chat_server
+
+
+@app.get("/")
+async def root() -> Dict[str, Any]:
+    return {
+        "status": "ok",
+        "service": "airline-chatkit-backend",
+        "health": "/health",
+        "bootstrap": "/chatkit/bootstrap",
+    }
 
 
 @app.post("/chatkit")

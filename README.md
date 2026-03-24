@@ -26,7 +26,19 @@ export OPENAI_API_KEY=your_api_key
 
 You can also follow [these instructions](https://platform.openai.com/docs/libraries#create-and-export-an-api-key) to set your OpenAI key at a global level.
 
-Alternatively, you can set the `OPENAI_API_KEY` environment variable in an `.env` file at the root of the `python-backend` folder. You will need to install the `python-dotenv` package to load the environment variables from the `.env` file. And then, add these lines of code to your app:
+Alternatively, you can set variables in a local env file under `python-backend` (for example `.env.local`), which is ignored by git in this repo.
+
+You can copy from `python-backend/.env.example` and set:
+
+- `OPENAI_API_KEY` (required)
+- `DYNATRACE_API_URL` (optional, enables tracing)
+- `DYNATRACE_API_TOKEN` (optional, enables tracing)
+
+If Dynatrace values are not set, the backend runs normally with tracing disabled.
+
+The app uses `python-dotenv` to load local env values at startup.
+
+Example:
 
 ```bash
 from dotenv import load_dotenv

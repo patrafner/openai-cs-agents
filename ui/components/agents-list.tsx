@@ -12,7 +12,6 @@ interface AgentsListProps {
 }
 
 export function AgentsList({ agents, currentAgent }: AgentsListProps) {
-  const activeAgent = agents.find((a) => a.name === currentAgent);
   return (
     <PanelSection
       title="Available Agents"
@@ -23,11 +22,6 @@ export function AgentsList({ agents, currentAgent }: AgentsListProps) {
           <Card
             key={agent.name}
             className={`bg-white border-gray-200 h-[130px] transition-all ${
-              agent.name === currentAgent ||
-              activeAgent?.handoffs.includes(agent.name)
-                ? ""
-                : "opacity-50 filter grayscale cursor-not-allowed pointer-events-none"
-            } ${
               agent.name === currentAgent
                 ? "ring-1 ring-blue-500 shadow-md"
                 : ""
@@ -44,7 +38,12 @@ export function AgentsList({ agents, currentAgent }: AgentsListProps) {
               </p>
               {agent.name === currentAgent && (
                 <Badge className="mt-2 bg-blue-600 hover:bg-blue-700 text-white">
-                  Active
+                  Active now
+                </Badge>
+              )}
+              {agent.name !== currentAgent && (
+                <Badge className="mt-2 bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
+                  Enabled
                 </Badge>
               )}
             </CardContent>
